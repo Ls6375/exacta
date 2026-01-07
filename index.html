@@ -46,6 +46,16 @@
       margin-left: 10px;
       display: none;
     }
+    .copied-msg {
+  color: green;
+  font-weight: bold;
+  margin-left: 15px; /* space between button and text */
+  display: none;
+}
+.btn-sm {
+  padding: 0.35rem 0.7rem; /* slightly larger button padding */
+}
+
   </style>
 </head>
 <body>
@@ -127,18 +137,20 @@
       const resultDiv = document.getElementById('result');
       resultDiv.style.display = 'block';
 
-      resultDiv.innerHTML = `
+        resultDiv.innerHTML = `
         <div class="line-box">
-          <div class="line-text">${line1}</div>
-          <span class="copied-msg" id="copied1">Copied </span>
-          <button class="btn btn-sm btn-outline-success" onclick='copyText("${line1.replace(/"/g,'\\"')}")'>Copy</button>
+            <div class="line-text">${line1}</div>
+            <span class="copied-msg" id="copied1">Copied</span>
+            <button class="btn btn-sm btn-outline-success" onclick='copyText("${line1.replace(/"/g,'\\"')}","copied1")'>Copy</button>
         </div>
-        ${line2 ? `<div class="line-box">
-          <div class="line-text">${line2}</div>
-          <span class="copied-msg" id="copied2">Copied </span>
-          <button class="btn btn-sm btn-outline-success" onclick='copyText("${line2.replace(/"/g,'\\"')}","copied2")'>Copy</button>
+        ${line2 ? `
+        <div class="line-box">
+            <div class="line-text">${line2}</div>
+            <span class="copied-msg" id="copied2">Copied</span>
+            <button class="btn btn-sm btn-outline-success" onclick='copyText("${line2.replace(/"/g,'\\"')}","copied2")'>Copy</button>
         </div>` : ""}
-      `;
+        `;
+
     }
 
     function copyText(text, msgId="copied1") {
