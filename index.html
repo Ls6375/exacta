@@ -122,7 +122,7 @@
       const colorIndex = weeksPassed % colors.length;
       const current = colors[colorIndex];
       const badge = document.getElementById('week-color-display');
-      badge.textContent = `This Week: ${current.name}`;
+      badge.textContent = `This Week Color: ${current.name}`;
       badge.style.backgroundColor = current.hex;
     }
     updateWeekColor();
