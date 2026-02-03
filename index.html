@@ -7,17 +7,33 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { background: #f4f6f8; font-family: Arial, sans-serif; }
-    .container { max-width: 750px; margin-top: 50px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .container { max-width: 750px; margin-top: 50px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; }
     textarea { height: 150px; resize: vertical; }
     .result-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px; font-weight: bold; white-space: pre-line; }
     .line-box { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
     .line-text { flex-grow: 1; margin-right: 10px; }
     .copied-msg { color: green; font-weight: bold; margin-right: 15px; display: none; }
     .btn-sm { padding: 0.35rem 0.7rem; }
+    
+    /* Week Color Badge Styles */
+    #week-color-display {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 5px 15px;
+      border-radius: 20px;
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div id="week-color-display">This Week: --</div>
+
     <h2 class="mb-4 text-center">Hardness Min-Max Finder</h2>
     
     <div class="mb-3">
@@ -55,6 +71,43 @@
   </div>
 
   <script>
+  // --- Week Color Logic ---
+  function updateWeekColor() {
+    const colors = [
+      { name: 'Orange', hex: '#fd7e14' },
+      { name: 'Green', hex: '#198754' },
+      { name: 'Blue', hex: '#0d6efd' },
+      { name: 'Pink', hex: '#d63384' }
+    ];
+  
+    const now = new Date();
+    const reference = new Date('2026-02-02T00:00:00Z'); // reference week = Orange
+  
+    const msInWeek = 7 * 24 * 60 * 60 * 1000;
+    const weeksPassed = Math.floor((now - reference) / msInWeek);
+  
+    const colorIndex = weeksPassed % colors.length;
+    const current = colors[colorIndex];
+  
+    const badge = document.getElementById('week-color-display');
+    badge.textContent = `This Week: ${current.name}`;
+    badge.style.backgroundColor = current.hex;
+    badge.style.transition = "background-color 1s ease";
+  }
+
+
+  // Run immediately
+  updateWeekColor();
+  // Check every minute to see if the day/week has rolled over
+  setInterval(updateWeekColor, 60000);
+
+    // Run on load
+    updateWeekColor();
+    // Auto-update every 60 seconds (no refresh needed)
+    setInterval(updateWeekColor, 60000);
+
+
+    // --- Original Logic ---
     function calculateMinMax() {
       const readingsInput = document.getElementById('readings').value;
       const correctionInput = document.getElementById('correction').value;
@@ -76,12 +129,9 @@
       const minValNum = Math.min(...numReadings);
       const maxValNum = Math.max(...numReadings);
 
-      // Extract the exact strings from input
       const minValStr = rawTokens[numReadings.indexOf(minValNum)];
       const maxValStr = rawTokens[numReadings.indexOf(maxValNum)];
 
-      // Calculate results without forcing .toFixed(2)
-      // This preserves natural decimals (e.g., 1.2 + 0 = 1.2)
       const minCorrected = Number((minValNum + correction).toPrecision(12)) / 1;
       const maxCorrected = Number((maxValNum + correction).toPrecision(12)) / 1;
 
