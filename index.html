@@ -6,56 +6,14 @@
   <title>Hardness Min-Max Finder</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      background: #f4f6f8;
-      font-family: Arial, sans-serif;
-    }
-    .container {
-      max-width: 750px;
-      margin-top: 50px;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    textarea {
-      height: 150px;
-      resize: vertical;
-    }
-    .result-box {
-      background: #e9ecef;
-      padding: 15px;
-      border-radius: 5px;
-      margin-top: 20px;
-      font-weight: bold;
-      white-space: pre-line;
-    }
-    .line-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 5px;
-    }
-    .line-text {
-      flex-grow: 1;
-      margin-right: 10px;
-    }
-    .copied-msg {
-      color: green;
-      font-weight: bold;
-      margin-right: 10px;
-      display: none;
-    }
-    .copied-msg {
-  color: green;
-  font-weight: bold;
-  margin-right: 15px; /* space between button and text */
-  display: none;
-}
-.btn-sm {
-  padding: 0.35rem 0.7rem; /* slightly larger button padding */
-}
-
+    body { background: #f4f6f8; font-family: Arial, sans-serif; }
+    .container { max-width: 750px; margin-top: 50px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    textarea { height: 150px; resize: vertical; }
+    .result-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px; font-weight: bold; white-space: pre-line; }
+    .line-box { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .line-text { flex-grow: 1; margin-right: 10px; }
+    .copied-msg { color: green; font-weight: bold; margin-right: 15px; display: none; }
+    .btn-sm { padding: 0.35rem 0.7rem; }
   </style>
 </head>
 <body>
@@ -63,7 +21,7 @@
     <h2 class="mb-4 text-center">Hardness Min-Max Finder</h2>
     
     <div class="mb-3">
-      <label for="readings" class="form-label">Enter hardness readings (one per line, can include text or commas):</label>
+      <label for="readings" class="form-label">Enter hardness readings:</label>
       <textarea class="form-control" id="readings" placeholder="30, 30.2, 30.4, 31.5"></textarea>
     </div>
     
@@ -83,7 +41,7 @@
         <input type="number" step="0.1" class="form-control" id="correction" placeholder="e.g. 0.5">
       </div>
       <div class="col-md-6">
-        <label for="correctionDesc" class="form-label">Correction description (bar size, etc.):</label>
+        <label for="correctionDesc" class="form-label">Correction description:</label>
         <input type="text" class="form-control" id="correctionDesc" placeholder="e.g. 2">
       </div>
     </div>
@@ -99,35 +57,41 @@
   <script>
     function calculateMinMax() {
       const readingsInput = document.getElementById('readings').value;
-      const correction = parseFloat(document.getElementById('correction').value) || 0;
+      const correctionInput = document.getElementById('correction').value;
+      const correction = parseFloat(correctionInput) || 0;
       const correctionDesc = document.getElementById('correctionDesc').value.trim();
       const unit = document.getElementById('unitType').value || 'HRC';
 
-      if (!readingsInput.trim()) {
-        alert("Please enter hardness readings.");
-        return;
-      }
+      if (!readingsInput.trim()) return;
 
-      const readings = readingsInput
+      const rawTokens = readingsInput
         .split('\n')
-        .flatMap(line => line.split(','))  
-        .map(item => parseFloat(item.replace(/[^\d\.\-]/g, ''))) 
-        .filter(val => !isNaN(val));
+        .flatMap(line => line.split(','))
+        .map(item => item.trim().replace(/[^\d\.\-]/g, ''))
+        .filter(item => item !== "");
 
-      if (readings.length === 0) {
-        alert("No valid numeric hardness readings found.");
-        return;
+      if (rawTokens.length === 0) return;
+
+      const numReadings = rawTokens.map(val => parseFloat(val));
+      const minValNum = Math.min(...numReadings);
+      const maxValNum = Math.max(...numReadings);
+
+      // Extract the exact strings from input
+      const minValStr = rawTokens[numReadings.indexOf(minValNum)];
+      const maxValStr = rawTokens[numReadings.indexOf(maxValNum)];
+
+      // Calculate results without forcing .toFixed(2)
+      // This preserves natural decimals (e.g., 1.2 + 0 = 1.2)
+      const minCorrected = Number((minValNum + correction).toPrecision(12)) / 1;
+      const maxCorrected = Number((maxValNum + correction).toPrecision(12)) / 1;
+
+      let line1 = `${minValStr} / ${maxValStr}`;
+      
+      if (correction !== 0) {
+        line1 += ` + ${correction} = ${minCorrected} / ${maxCorrected} ${unit}`;
+      } else {
+        line1 += ` = ${minCorrected} / ${maxCorrected} ${unit}`;
       }
-
-      const minVal = Math.min(...readings);
-      const maxVal = Math.max(...readings);
-
-      const minCorrected = (minVal + correction).toFixed(2);
-      const maxCorrected = (maxVal + correction).toFixed(2);
-
-      let line1 = `${minVal} / ${maxVal}`;
-      if (correction !== 0) line1 += ` + ${correction} = ${minCorrected} / ${maxCorrected} ${unit}`;
-      else line1 += ` = ${minCorrected} / ${maxCorrected} ${unit}`;
 
       let line2 = "";
       if (correction !== 0 && correctionDesc) {
@@ -136,30 +100,26 @@
 
       const resultDiv = document.getElementById('result');
       resultDiv.style.display = 'block';
-
-        resultDiv.innerHTML = `
+      resultDiv.innerHTML = `
         <div class="line-box">
             <div class="line-text">${line1}</div>
             <span class="copied-msg" id="copied1">Copied</span>
-            <button class="btn btn-sm btn-outline-success" onclick='copyText("${line1.replace(/"/g,'\\"')}","copied1")'>Copy</button>
+            <button class="btn btn-sm btn-outline-success" onclick='copyText(\`${line1}\`,"copied1")'>Copy</button>
         </div>
         ${line2 ? `
         <div class="line-box">
             <div class="line-text">${line2}</div>
             <span class="copied-msg" id="copied2">Copied</span>
-            <button class="btn btn-sm btn-outline-success" onclick='copyText("${line2.replace(/"/g,'\\"')}","copied2")'>Copy</button>
+            <button class="btn btn-sm btn-outline-success" onclick='copyText(\`${line2}\`,"copied2")'>Copy</button>
         </div>` : ""}
-        `;
-
+      `;
     }
 
-    function copyText(text, msgId="copied1") {
+    function copyText(text, msgId) {
       navigator.clipboard.writeText(text).then(() => {
         const msg = document.getElementById(msgId);
-        if(msg){
-          msg.style.display = 'inline';
-          setTimeout(() => { msg.style.display = 'none'; }, 1500);
-        }
+        msg.style.display = 'inline';
+        setTimeout(() => { msg.style.display = 'none'; }, 1500);
       });
     }
 
@@ -167,7 +127,6 @@
       document.getElementById('readings').value = '';
       document.getElementById('correction').value = '';
       document.getElementById('correctionDesc').value = '';
-      document.getElementById('unitType').value = 'HRC';
       document.getElementById('result').style.display = 'none';
     }
   </script>
