@@ -3,173 +3,193 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hardness Min-Max Finder</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Exactatherm Hardness Min-Max Finder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
   <style>
-    body { background: #f4f6f8; font-family: Arial, sans-serif; }
-    .container { max-width: 750px; margin-top: 50px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; }
-    textarea { height: 150px; resize: vertical; }
-    .result-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin-top: 20px; font-weight: bold; white-space: pre-line; }
-    .line-box { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
-    .line-text { flex-grow: 1; margin-right: 10px; }
-    .copied-msg { color: green; font-weight: bold; margin-right: 15px; display: none; }
-    .btn-sm { padding: 0.35rem 0.7rem; }
-    
-    /* Week Color Badge Styles */
-    #week-color-display {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      padding: 5px 15px;
-      border-radius: 20px;
-      color: white;
-      font-weight: bold;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    .fade-in {
+      animation: fadeIn 0.5s ease forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .copied-msg {
+      opacity: 0;
+      transition: opacity 0.5s;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #16a34a;
+    }
+    .copied-msg.show {
+      opacity: 1;
     }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div id="week-color-display">This Week: --</div>
+<body class="min-h-screen flex items-center justify-center p-6 bg-gray-50 font-sans">
 
-    <h2 class="mb-4 text-center">Hardness Min-Max Finder</h2>
-    
-    <div class="mb-3">
-      <label for="readings" class="form-label">Enter hardness readings:</label>
-      <textarea class="form-control" id="readings" placeholder="30, 30.2, 30.4, 31.5"></textarea>
+  <div class="w-full max-w-3xl bg-white rounded-xl shadow-2xl p-8 relative">
+
+    <!-- Week Badge -->
+    <div id="week-color-display" class="absolute top-6 right-6 px-4 py-1 rounded-full font-semibold text-white shadow-md text-sm">
+      This Week Color: --
     </div>
-    
-    <div class="mb-3 row">
-      <div class="col-md-3">
-        <label for="unitType" class="form-label">Hardness Unit:</label>
-        <select id="unitType" class="form-select">
-          <option value="HRC" selected>HRC</option>
-          <option value="HRB">HRB</option>
-          <option value="HRA">HRA</option>
-          <option value="HV">HV</option>
-          <option value="HB">HB</option>
-        </select>
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <!-- Paste your SVG logo here -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="251" height="35" viewBox="0 0 251 35" fill="none">
+        <g clip-path="url(#clip0_87_82)">
+          <path d="M0.5 10.1702H20.58V16.3902H7.97V19.4102H19.42V25.1902H7.97V28.2102H20.95V34.4302H0.5V10.1702Z" fill="black"/>
+          <path d="M29.1496 21.5202L21.1696 10.1702H29.9396L33.6096 16.7602L37.2096 10.1702H45.4996L37.7197 21.5902L46.3797 34.4302H37.3797L33.2296 27.1902L28.9496 34.4302H20.3896L29.1596 21.5202H29.1496Z" fill="black"/>
+          <path d="M52.9305 10.1702H60.2305L69.0605 34.4302H61.3105L60.2905 30.9602H52.5805L51.4905 34.4302H43.9805L52.9205 10.1702H52.9305ZM58.8105 25.7602L56.6405 18.2902H56.5705L54.2305 25.7602H58.8205H58.8105Z" fill="black"/>
+          <path d="M84.3303 19.2101C84.1903 18.3301 83.5103 15.6401 80.4203 15.6401C76.9203 15.6401 75.8003 19.0401 75.8003 22.3001C75.8003 25.5601 76.9203 28.9601 80.4203 28.9601C82.9303 28.9601 83.9203 27.1901 84.3603 24.9201H91.7003C91.7003 29.8101 87.7203 35.0101 80.6203 35.0101C72.7703 35.0101 68.3203 29.4701 68.3203 22.3001C68.3203 14.6601 73.1403 9.59009 80.6203 9.59009C87.2803 9.62009 90.9503 13.1201 91.5903 19.2101H84.3203H84.3303Z" fill="black"/>
+          <path d="M98.1301 16.3902H91.3301V10.1702H112.4V16.3902H105.6V34.4302H98.1301V16.3902Z" fill="black"/>
+          <path d="M137.14 16.3902H130.34V10.1702H151.41V16.3902H144.61V34.4302H137.14V16.3902Z" fill="black"/>
+          <path d="M152.47 10.1702H159.94V18.6002H166.94V10.1702H174.41V34.4302H166.94V24.8102H159.94V34.4302H152.47V10.1702Z" fill="black"/>
+          <path d="M176.56 10.1702H196.64V16.3902H184.03V19.4102H195.48V25.1902H184.03V28.2102H197.01V34.4302H176.56V10.1702Z" fill="black"/>
+          <path d="M198.78 10.1702H213.02C217.27 10.1702 220.94 12.5102 220.94 17.1002C220.94 19.6102 219.78 22.2602 217.3 23.1802C219.34 23.9602 220.6 26.2002 220.87 29.2302C220.97 30.4202 221.01 33.3102 221.69 34.4302H214.22C213.85 33.2102 213.71 31.9502 213.61 30.6902C213.41 28.3802 213.2 25.9702 210.25 25.9702H206.28V34.4302H198.81V10.1702H198.78ZM206.25 20.7702H210.16C211.55 20.7702 213.46 20.5302 213.46 18.3602C213.46 16.8302 212.61 15.9502 209.76 15.9502H206.26V20.7702H206.25Z" fill="black"/>
+          <path d="M222.23 10.1702H232.86L236.33 24.4402H236.4L239.87 10.1702H250.5V34.4302H243.43V18.8702H243.36L239.15 34.4302H233.58L229.37 18.8702H229.3V34.4302H222.23V10.1702Z" fill="black"/>
+          <path d="M128.13 28.09C128.13 23.19 121.27 16.78 121.27 16.78C121.27 16.78 114.41 23.19 114.41 28.09C114.41 32.99 118.18 34.33 118.42 34.43H108.73L121.27 0.5L133.8 34.43H124.11C124.35 34.33 128.12 32.84 128.12 28.09H128.13Z" fill="#107A40"/>
+          <path d="M124.9 31.05C124.9 28.41 121.27 25 121.27 25C121.27 25 117.64 28.36 117.64 31.05C117.64 33.05 119.26 34.68 121.27 34.68C123.28 34.68 124.9 33.06 124.9 31.05Z" fill="#20B0BA"/>
+        </g>
+        <defs>
+          <clipPath id="clip0_87_82">
+            <rect width="250" height="34.51" fill="white" transform="translate(0.5 0.5)"/>
+          </clipPath>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Header -->
+    <h2 class="text-center text-3xl font-bold text-black mb-8">Min-Max Hardness Finder</h2>
+
+    <!-- Input Area -->
+    <div class="space-y-6">
+      <div>
+        <label for="readings" class="block mb-2 text-gray-700 font-medium">Enter Hardness Readings:</label>
+        <textarea id="readings" placeholder="30, 30.2, 30.4, 31.5"
+          class="w-full p-4 rounded-lg bg-gray-100 text-gray-900 border border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50 resize-none h-32"></textarea>
       </div>
-      <div class="col-md-3">
-        <label for="correction" class="form-label">Correction factor:</label>
-        <input type="number" step="0.1" class="form-control" id="correction" placeholder="e.g. 0.5">
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label for="unitType" class="block mb-2 text-gray-700 font-medium">Hardness Unit:</label>
+          <select id="unitType" class="w-full p-3 rounded-lg bg-gray-100 text-gray-900 border border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50">
+            <option value="HRC" selected>HRC</option>
+            <option value="HRB">HRB</option>
+            <option value="HRA">HRA</option>
+            <option value="HV">HV</option>
+            <option value="HB">HB</option>
+          </select>
+        </div>
+        <div>
+          <label for="correction" class="block mb-2 text-gray-700 font-medium">Correction Factor:</label>
+          <input type="number" step="0.1" id="correction" placeholder="0.5"
+            class="w-full p-3 rounded-lg bg-gray-100 text-gray-900 border border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50">
+        </div>
+        <div>
+          <label for="correctionDesc" class="block mb-2 text-gray-700 font-medium">Correction Description:</label>
+          <input type="text" id="correctionDesc" placeholder="2"
+            class="w-full p-3 rounded-lg bg-gray-100 text-gray-900 border border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200 focus:ring-opacity-50">
+        </div>
       </div>
-      <div class="col-md-6">
-        <label for="correctionDesc" class="form-label">Correction description:</label>
-        <input type="text" class="form-control" id="correctionDesc" placeholder="e.g. 2">
+
+      <!-- Buttons -->
+      <div class="flex flex-col md:flex-row gap-4">
+        <button onclick="calculateMinMax()" class="flex-1 bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-yellow-400 hover:to-orange-500 text-gray-900 font-bold py-3 rounded-lg shadow-lg transition-all duration-300">Calculate</button>
+        <button onclick="clearAll()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-3 rounded-lg shadow transition-all duration-300">Clear</button>
       </div>
     </div>
-    
-    <div class="d-flex gap-2">
-      <button class="btn btn-primary flex-grow-1" onclick="calculateMinMax()">Calculate</button>
-      <button class="btn btn-secondary flex-grow-1" onclick="clearAll()">Clear</button>
-    </div>
-    
-    <div id="result" class="result-box mt-3" style="display:none;"></div>
+
+    <!-- Result -->
+    <div id="result" class="mt-8 space-y-4 fade-in hidden"></div>
   </div>
 
+
   <script>
-  // --- Week Color Logic ---
-  function updateWeekColor() {
-    const colors = [
-      { name: 'Orange', hex: '#fd7e14' },
-      { name: 'Green', hex: '#198754' },
-      { name: 'Blue', hex: '#0d6efd' },
-      { name: 'Pink', hex: '#d63384' }
-    ];
-  
-    const now = new Date();
-    const reference = new Date('2026-02-02T00:00:00Z'); // reference week = Orange
-  
-    const msInWeek = 7 * 24 * 60 * 60 * 1000;
-    const weeksPassed = Math.floor((now - reference) / msInWeek);
-  
-    const colorIndex = weeksPassed % colors.length;
-    const current = colors[colorIndex];
-  
-    const badge = document.getElementById('week-color-display');
-    badge.textContent = `This Week: ${current.name}`;
-    badge.style.backgroundColor = current.hex;
-    badge.style.transition = "background-color 1s ease";
-  }
-
-
-  // Run immediately
-  updateWeekColor();
-  // Check every minute to see if the day/week has rolled over
-  setInterval(updateWeekColor, 60000);
-
-    // Run on load
+    function updateWeekColor() {
+      const colors = [
+        { name: 'Orange', hex: '#f97316' },
+        { name: 'Green', hex: '#22c55e' },
+        { name: 'Blue', hex: '#3b82f6' },
+        { name: 'Pink', hex: '#ec4899' }
+      ];
+      const now = new Date();
+      const reference = new Date('2026-02-02T00:00:00Z');
+      const msInWeek = 7 * 24 * 60 * 60 * 1000;
+      const weeksPassed = Math.floor((now - reference) / msInWeek);
+      const colorIndex = weeksPassed % colors.length;
+      const current = colors[colorIndex];
+      const badge = document.getElementById('week-color-display');
+      badge.textContent = `This Week: ${current.name}`;
+      badge.style.backgroundColor = current.hex;
+    }
     updateWeekColor();
-    // Auto-update every 60 seconds (no refresh needed)
     setInterval(updateWeekColor, 60000);
 
-
-    // --- Original Logic ---
     function calculateMinMax() {
       const readingsInput = document.getElementById('readings').value;
-      const correctionInput = document.getElementById('correction').value;
-      const correction = parseFloat(correctionInput) || 0;
+      const correction = parseFloat(document.getElementById('correction').value) || 0;
       const correctionDesc = document.getElementById('correctionDesc').value.trim();
       const unit = document.getElementById('unitType').value || 'HRC';
-
       if (!readingsInput.trim()) return;
 
       const rawTokens = readingsInput
-        .split('\n')
-        .flatMap(line => line.split(','))
-        .map(item => item.trim().replace(/[^\d\.\-]/g, ''))
-        .filter(item => item !== "");
+        .split('\n').flatMap(line => line.split(','))
+        .map(x => x.trim().replace(/[^\d\.\-]/g, ''))
+        .filter(x => x !== "");
 
       if (rawTokens.length === 0) return;
 
-      const numReadings = rawTokens.map(val => parseFloat(val));
+      const numReadings = rawTokens.map(Number);
       const minValNum = Math.min(...numReadings);
       const maxValNum = Math.max(...numReadings);
 
       const minValStr = rawTokens[numReadings.indexOf(minValNum)];
       const maxValStr = rawTokens[numReadings.indexOf(maxValNum)];
 
-      const minCorrected = Number((minValNum + correction).toPrecision(12)) / 1;
-      const maxCorrected = Number((maxValNum + correction).toPrecision(12)) / 1;
+      const minCorrected = Number((minValNum + correction).toPrecision(12));
+      const maxCorrected = Number((maxValNum + correction).toPrecision(12));
 
       let line1 = `${minValStr} / ${maxValStr}`;
-      
-      if (correction !== 0) {
-        line1 += ` + ${correction} = ${minCorrected} / ${maxCorrected} ${unit}`;
-      } else {
-        line1 += ` = ${minCorrected} / ${maxCorrected} ${unit}`;
-      }
-
-      let line2 = "";
-      if (correction !== 0 && correctionDesc) {
-        line2 = `Add ${correction}" ${unit} For ${correctionDesc}" Dia`;
-      }
+      line1 += correction !== 0 ? ` + ${correction} = ${minCorrected} / ${maxCorrected} ${unit}` : ` = ${minCorrected} / ${maxCorrected} ${unit}`;
+      let line2 = (correction !== 0 && correctionDesc) ? `Add ${correction}" ${unit} For ${correctionDesc}" Dia` : "";
 
       const resultDiv = document.getElementById('result');
-      resultDiv.style.display = 'block';
       resultDiv.innerHTML = `
-        <div class="line-box">
-            <div class="line-text">${line1}</div>
+        <div class="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow relative">
+          <div class="text-gray-900 font-semibold">${line1}</div>
+          <div class="flex items-center gap-2">
             <span class="copied-msg" id="copied1">Copied</span>
-            <button class="btn btn-sm btn-outline-success" onclick='copyText(\`${line1}\`,"copied1")'>Copy</button>
+            <button class="text-green-500 hover:text-green-400 copy-btn" data-text="${line1}" data-msg="copied1">
+              <i data-feather="copy"></i>
+            </button>
+          </div>
         </div>
-        ${line2 ? `
-        <div class="line-box">
-            <div class="line-text">${line2}</div>
+        ${line2 ? `<div class="flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow relative">
+          <div class="text-gray-900 font-semibold">${line2}</div>
+          <div class="flex items-center gap-2">
             <span class="copied-msg" id="copied2">Copied</span>
-            <button class="btn btn-sm btn-outline-success" onclick='copyText(\`${line2}\`,"copied2")'>Copy</button>
+            <button class="text-green-500 hover:text-green-400 copy-btn" data-text="${line2}" data-msg="copied2">
+              <i data-feather="copy"></i>
+            </button>
+          </div>
         </div>` : ""}
       `;
-    }
+      feather.replace();
+      resultDiv.classList.remove('hidden');
 
-    function copyText(text, msgId) {
-      navigator.clipboard.writeText(text).then(() => {
-        const msg = document.getElementById(msgId);
-        msg.style.display = 'inline';
-        setTimeout(() => { msg.style.display = 'none'; }, 1500);
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const text = btn.dataset.text;
+          const msgId = btn.dataset.msg;
+          navigator.clipboard.writeText(text).then(() => {
+            const msg = document.getElementById(msgId);
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 1500);
+          });
+        });
       });
     }
 
@@ -177,8 +197,9 @@
       document.getElementById('readings').value = '';
       document.getElementById('correction').value = '';
       document.getElementById('correctionDesc').value = '';
-      document.getElementById('result').style.display = 'none';
+      document.getElementById('result').classList.add('hidden');
     }
   </script>
+
 </body>
 </html>
