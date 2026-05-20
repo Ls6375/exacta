@@ -1,0 +1,5 @@
+# Code to Iterate in PDF gen
+{% iterate({partNumber::specs}, "split(' ', name)[0]")[0] == "BAC"
+  ? "BAC, "
+  : ""
+%} 
